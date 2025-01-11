@@ -6,10 +6,7 @@ import {
   Clock,
   DoorOpen,
   BaggageClaim,
-  // Baggage,
-  // Gate,
 } from "lucide-react";
-import directFlight from "../assets/images/directFlight.svg"
 
 const FlightStatusCard = ({ flight }) => {
   const [showDetails, setShowDetails] = useState(false);
@@ -30,33 +27,37 @@ const FlightStatusCard = ({ flight }) => {
     const delays = [];
     if (flight.delays.departureGateDelayMinutes) {
       delays.push(
-        `Departure delayed by ${flight.delays.departureGateDelayMinutes} minutes`
+        `Departure delayed by ${formatMinutesToHoursAndMinutes(
+          flight.delays.departureGateDelayMinutes
+        )} `
       );
     }
     if (flight.delays.arrivalGateDelayMinutes) {
       delays.push(
-        `Arrival delayed by ${flight.delays.arrivalGateDelayMinutes} minutes`
+        `Arrival delayed by ${formatMinutesToHoursAndMinutes(
+          flight.delays.arrivalGateDelayMinutes
+        )} `
       );
     }
     return delays;
   };
 
   return (
-    <div
-      className={`bg-[var(--light-black)] w-full text-white rounded-xl p-6 mb-4 transition-all duration-300 ease-in-out ${
-        showDetails ? "h-auto" : "h-auto"
-      }`}
-    >
-      <div className="w-full flex justify-between">
-        <span className="text-xl font-semibold text-blue-400">
-          {flight.carrierFsCode} {flight.flightNumber}
-        </span>
+    <div className="bg-gradient-to-br from-slate-900 to-slate-800 w-full text-white rounded-2xl p-8 mb-4 shadow-xl hover:shadow-2xl transition-all duration-300">
+      {/* Header Section */}
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center space-x-3">
+          <Plane className="text-blue-400" size={24} />
+          <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300">
+            {flight.carrierFsCode} {flight.flightNumber}
+          </span>
+        </div>
 
-        <div className="mb-4">
+        <div className="">
           <span
-            className={`px-3 py-1 rounded-full text-sm font-medium ${
+            className={`px-3 py-1  rounded-full text-sm font-medium ${
               flight.status === "L"
-                ? "bg-[#579B22]/10 text-[var(--primary-color-green)]"
+                ? "bg-green-500/20 text-green-400"
                 : flight.status === "A"
                 ? "bg-blue-500/20 text-blue-400"
                 : flight.status === "S"
@@ -96,139 +97,172 @@ const FlightStatusCard = ({ flight }) => {
         </div>
       </div>
 
-      <div className="bg-[var(--light-black)]   relative">
-        <div className="flex w-[80%]  max-md:w-full items-center justify-between">
-          <div className="space-y-1">
-            <div className="text-base text-gray-400">
-              {new Date(flight.departureDate.dateLocal).toLocaleDateString()}
-            </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-xl">
-                {new Date(flight.departureDate.dateLocal).toLocaleTimeString(
-                  "en-US",
-                  { hour: "2-digit", minute: "2-digit" }
-                )}
-              </span>
-            </div>
-            <div className="text-[var(--primary-color-green)] pt-2  text-3xl font-semibold">
-              {flight.departureAirportFsCode}
-            </div>
-            <div className="text-xl">Bengaluru</div>
+      {/* Main Flight Info Section */}
+      <div className="grid grid-cols-3 gap-4 relative">
+        {/* Departure Info */}
+        <div className="space-y-2">
+          <div className="text-sm text-gray-400">
+            {new Date(flight.departureDate.dateLocal).toLocaleDateString()}
+          </div>
+          <div className="text-2xl font-bold">
+            {new Date(flight.departureDate.dateLocal).toLocaleTimeString(
+              "en-US",
+              { hour: "2-digit", minute: "2-digit" }
+            )}
+          </div>
+          <div className="text-4xl font-bold text-[var(--primary-color-green)] mt-2">
+            {flight.departureAirportFsCode}
+          </div>
+        </div>
+
+        {/* Flight Duration */}
+        <div className="flex flex-col items-center justify-center relative">
+          <div className="text-sm text-gray-400 mb-2">
+            Duration
+            <span className="text-white ml-1">
+              {formatMinutesToHoursAndMinutes(
+                flight.flightDurations.scheduledBlockMinutes
+              )}
+            </span>
           </div>
 
-          <div className="flex flex-col items-center  px-4">
-            <div className="text-base text-gray-400 mb-2">
-              Duration
+          <div className="w-full h-[2px] bg-gradient-to-r from-transparent via-blue-400 to-transparent my-4">
+            <div className="relative">
+              <Plane
+                className="text-blue-400 absolute  -top-4 left-1/2 transform -translate-x-1/2 "
+                size={30}
+              />
+            </div>
+          </div>
+
+          {flight.flightDurations.taxiOutMinutes && (
+            <div className="text-sm text-gray-400 mb-2">
+              Remaining Time
               <span className="text-white">
                 {" "}
                 :{" "}
-                {formatMinutesToHoursAndMinutes(
-                  flight.flightDurations.scheduledBlockMinutes
+                {calculateRemainingTime(
+                  flight.flightDurations.scheduledBlockMinutes,
+                  flight.flightDurations.taxiOutMinutes
                 )}
               </span>
             </div>
+          )}
 
-            <div className="w-full flex items-center gap-2 my-1 ">
-              <img className="w-full h-[40px]" src={directFlight} alt="" />
-            </div>
-            {flight.flightDurations.taxiOutMinutes && (
-              <div className="text-base text-gray-400 mb-2">
-                Remaining Time
-                <span className="text-white">
-                  {" "}
-                  :{" "}
-                  {calculateRemainingTime(
-                    flight.flightDurations.scheduledBlockMinutes,
-                    flight.flightDurations.taxiOutMinutes
-                  )}
-                </span>
-              </div>
-            )}
-            <div className="text-base text-gray-400 ">Direct</div>
+          <div className="text-sm text-gray-400">Direct Flight</div>
+        </div>
+
+        {/* Arrival Info */}
+        <div className="space-y-2 text-right">
+          <div className="text-sm text-gray-400">
+            {new Date(flight.arrivalDate.dateLocal).toLocaleDateString()}
           </div>
-
-          <div className="space-y-1 ">
-            <div className="text-base text-gray-400">
-              {new Date(flight.arrivalDate.dateLocal).toLocaleDateString()}
-            </div>
-            <div className="flex  items-baseline gap-2">
-              <span className="text-xl">
-                {new Date(flight.arrivalDate.dateLocal).toLocaleTimeString(
-                  "en-US",
-                  { hour: "2-digit", minute: "2-digit" }
-                )}
-              </span>
-            </div>
-            <div className="text-[var(--primary-color-green)] pt-2  text-3xl font-semibold">
-              {flight.arrivalAirportFsCode}
-            </div>
-            <div className="text-xl">Kuala Lumpur</div>
+          <div className="text-2xl font-bold">
+            {new Date(flight.arrivalDate.dateLocal).toLocaleTimeString(
+              "en-US",
+              { hour: "2-digit", minute: "2-digit" }
+            )}
+          </div>
+          <div className="text-4xl font-bold text-[var(--primary-color-green)] mt-2">
+            {flight.arrivalAirportFsCode}
           </div>
         </div>
       </div>
 
+      {/* Expandable Details Section */}
       <div
-        className={`w-full mt-4 text-base  overflow-hidden transition-all duration-300 ease-in-out ${
-          showDetails ? "max-h-96" : "max-h-0"
+        className={`transition-all duration-300 ease-in-out overflow-hidden ${
+          showDetails ? "max-h-[400px]  opacity-100" : "max-h-0 opacity-0"
         }`}
       >
-        <div className="border-t border-gray-700 pt-4 space-y-4">
-          {/* flight id */}
-          <div className="flex items-center gap-2">
-            <Plane className="text-gray-400" size={20} />
-            <span className="text-gray-400">Flight Id:</span>
-            <span className="text-blue-400">
-              {flight.flightId} 
-            </span>
-          </div>
-
-          {/* Flight Equipment */}
-          <div className="flex items-center gap-2">
-            <Plane className="text-gray-400" size={20} />
-            <span className="text-gray-400">Aircraft:</span>
-            <span>
-              {flight.flightEquipment.actualEquipmentIataCode} -{" "}
-              {flight.flightEquipment.tailNumber}
-            </span>
-          </div>
-
-          {/* Terminal & Gate Information */}
-          <div className="flex items-center gap-2">
-            <DoorOpen className="text-gray-400" size={20} />
-            <span className="text-gray-400">Gates:</span>
-            <span>
-              Departure: Terminal {flight.airportResources.departureTerminal},
-              Gate {flight.airportResources.departureGate}
-              {flight.airportResources.arrivalTerminal &&
-                ` | Arrival: Terminal ${flight.airportResources.arrivalTerminal}`}
-            </span>
-          </div>
-
-          {/* Baggage Information */}
-          {flight.airportResources.baggage && (
-            <div className="flex items-center gap-2">
-              <BaggageClaim className="text-gray-400" size={20} />
-              <span className="text-gray-400">Baggage Claim:</span>
-              <span>{flight.airportResources.baggage}</span>
+        <div className="mt-6 pt-6 border-t border-gray-700/50 space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-slate-800/50 p-4 rounded-xl">
+              <div className="flex items-center gap-3">
+                <Plane
+                  className="text-[var(--primary-color-green)]"
+                  size={20}
+                />
+                <div>
+                  <div className="text-sm text-gray-400">Flight Id</div>
+                  <div className="text-base">{flight.flightId}</div>
+                </div>
+              </div>
             </div>
-          )}
 
-          {/* Delays */}
+            <div className="bg-slate-800/50 p-4 rounded-xl">
+              <div className="flex items-center gap-3">
+                <Plane
+                  className="text-[var(--primary-color-green)]"
+                  size={20}
+                />
+                <div>
+                  <div className="text-sm text-gray-400">Aircraft</div>
+                  <div className="text-base">
+                    {flight.flightEquipment.actualEquipmentIataCode} -{" "}
+                    {flight.flightEquipment.tailNumber}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {flight.airportResources.baggage && (
+              <div className="bg-slate-800/50 p-4 rounded-xl">
+                <div className="flex items-center gap-2">
+                  <BaggageClaim
+                    className="text-[var(--primary-color-green)]"
+                    size={20}
+                  />
+                  <div>
+                    <div className="text-sm text-gray-400">Baggage Claim</div>
+                    <div className="text-base">
+                      {flight.airportResources.baggage}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="bg-slate-800/50 p-4 rounded-xl">
+            <div className="flex items-center gap-3">
+              <DoorOpen
+                className="text-[var(--primary-color-green)]"
+                size={20}
+              />
+
+              <div>
+                <div className="text-sm text-gray-400">Gates</div>
+                <div className="text-base">
+                  <span>
+                    Departure: Terminal{" "}
+                    {flight.airportResources.departureTerminal}, Gate{" "}
+                    {flight.airportResources.departureGate}
+                    {flight.airportResources.arrivalTerminal &&
+                      ` | Arrival: Terminal ${flight.airportResources.arrivalTerminal}`}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {getDelayInfo()?.length > 0 && (
-            <div className="flex items-center gap-2">
-              <Clock className="text-orange-400" size={20} />
-              <span className="text-orange-400">Delays:</span>
-              <span>{getDelayInfo().join(" | ")}</span>
+            <div className="bg-orange-950/30 p-4 rounded-xl">
+              <div className="flex items-center gap-3">
+                <Clock className="text-orange-400" size={20} />
+                <div>
+                  <div className="text-sm text-orange-400">Delays</div>
+                  <div className="text-base">{getDelayInfo().join(" | ")}</div>
+                </div>
+              </div>
             </div>
           )}
-
-         
         </div>
       </div>
 
+      {/* Toggle Details Button */}
       <button
         onClick={() => setShowDetails(!showDetails)}
-        className="w-full text-sm mt-2  flex items-center justify-center gap-2 text-[var(--primary-color-green)] hover:opacity-50 transition-colors duration-200"
+        className="w-full mt-6 py-2 flex items-center justify-center gap-2 text-[var(--primary-color-green)] hover:text-emerald-300 transition-colors duration-200"
       >
         {showDetails ? (
           <>
@@ -242,6 +276,8 @@ const FlightStatusCard = ({ flight }) => {
           </>
         )}
       </button>
+
+      
     </div>
   );
 };

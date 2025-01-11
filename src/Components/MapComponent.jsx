@@ -53,10 +53,22 @@ const MapComponent = () => {
         attribution: "© OpenStreetMap contributors",
       }).addTo(map);
 
-      // Add marker if coordinates are provided
+      // marker for your location
       if (latitude && longitude) {
-        L.marker([latitude, longitude]).bindPopup(`
-          <b>your location</b><br>
+         
+          const redIcon = L.icon({
+            iconUrl:
+              "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
+            shadowUrl:
+              "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41],
+          });
+
+        L.marker([latitude, longitude], {icon: redIcon}).bindPopup(`
+          <b>My location</b><br>
          
         `)
         .addTo(map).addTo(map);
@@ -69,8 +81,7 @@ const MapComponent = () => {
            .bindPopup(
               `
               <b>${airport.name}</b><br>
-              ${airport.city}, ${airport.country}<br>
-              ${airport.iataCode}<br>
+              ${airport.city},
               ${airport.countryCode}
               `
             )
@@ -93,7 +104,7 @@ const MapComponent = () => {
 
   return (
     <div className="bg-gray-800  rounded-lg">
-      <div id="map" className="h-80 rounded-lg" />
+      <div id="map" className="h-96 rounded-lg" />
     
     </div>
   );

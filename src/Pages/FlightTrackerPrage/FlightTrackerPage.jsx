@@ -28,8 +28,6 @@ const FlightTrackerPage = () => {
     setSearchRadius,
     currentPage,
     setCurrentPage,
-    searchTerm,
-    setSearchTerm,
     dateTime,
     setDateTime,
     typeOfStatus,
@@ -101,44 +99,21 @@ const FlightTrackerPage = () => {
     }
   }, [latitude, longitude, searchRadius]);
 
-  // getting flights
-  const fetchFlights = async (airportCode) => {
-    setloading(true);
-    try {
-      const baseURL = "https://100085.pythonanywhere.com";
-      const res = await axios.post(
-        `${baseURL}/api/fligts/?type=get_flights_arrival_departure`,
-        {
-          airport_code: airportCode,
-          year: dateTime.year,
-          month: dateTime.month,
-          day: dateTime.day,
-          hourOfDay: dateTime.hour,
-          maxFlights: flightsPerPage,
-          typeOfStatus: typeOfStatus,
-        }
-      );
-      setFlights(res.data.response || []);
-      setCurrentPage(1);
-    } catch (err) {
-      setError(`Error fetching flights: ${err.message}`);
-    } finally {
-      setloading(false);
-    }
-  };
+
+
 
   return (
     <div className="w-full bg-black relative text-xl overflow-hidden px-[5vw] py-[30px] text-white">
       <div
         className="absolute top-[-500px] left-[50%] translate-x-[-50%] h-[700px] z-[0] w-[700px] rounded-full"
         style={{
-          background: "radial-gradient(circle, #579B22 0%, transparent 60%)",
+          background: "radial-gradient(circle, #34d399 0%, transparent 60%)",
         }}
       ></div>
 
       <Navbar />
 
-      <div className="w-full min-h-[80px] mt-[40px] text-xl rounded-2xl bg-[var(--light-black)] relative flex justify-between items-center px-[30px] py-[10px]">
+      <div className="w-full min-h-[80px] mt-[40px] text-xl rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 relative flex justify-between items-center px-[30px] py-[10px]">
         <div>
           <h1 className="font-semibold text-2xl max-sm:text-lg">
             Good Morning, User!
@@ -204,7 +179,7 @@ const FlightTrackerPage = () => {
             <motion.h1
               className="text-base"
               initial={{ opacity: 0 }}
-              animate={{ opacity: 0.5 }}
+              animate={{ opacity: 0.8 }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
             >
               updating Location<span className="ml-1">.</span>
@@ -257,7 +232,12 @@ const FlightTrackerPage = () => {
       <div className="w-full mt-[50px] flex justify-between items-center">
         <div className="flex items-center gap-2 mb-4">
           <IoAirplaneSharp className="text-[var(--primary-color-green)] rotate-[-45deg] text-xl" />
-          <span className="text-2xl font-semibold">Flight Schedule</span>
+          <span className="text-2xl font-semibold">
+            Flight Schedule
+            <span className="text-sm px-4 text-gray-400">
+              Showing {flights.length} flights
+            </span>
+          </span>
         </div>
         <div className="relative">
           <button onClick={toggleDropdown} className="flex items-center gap-4">
@@ -273,7 +253,7 @@ const FlightTrackerPage = () => {
               }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2, easing: easeInOut }}
-              className={`absolute z-[40]  flex flex-col top-full right-0 bg-[var(--light-black)] py-4 px-8 rounded-md shadow-xl ${
+              className={`absolute z-[40]  flex flex-col top-full right-0  bg-gradient-to-br from-slate-900 to-slate-800  py-4 px-8 rounded-md shadow-xl ${
                 isDropdownOpen ? "block" : "hidden"
               }`}
             >
@@ -321,7 +301,7 @@ const FlightTrackerPage = () => {
       {loading && (
         <div className="fixed inset-0 bg-black bg-opacity-20 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-black bg-opacity-70 backdrop-blur-lg rounded-xl p-6 border border-gray-700/50">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500 mx-auto"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
             <motion.h1
               className="text-base mt-6"
               initial={{ opacity: 0 }}

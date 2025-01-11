@@ -16,7 +16,6 @@ export const AppProvider = ({ children }) => {
   const [flightsPerPage, setFlightsPerPage] = useState(10);
   const [searchRadius, setSearchRadius] = useState(100);
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState("");
   const [dateTime, setDateTime] = useState({
     year: new Date().getFullYear(),
     month: new Date().getMonth() + 1,
@@ -45,8 +44,7 @@ export const AppProvider = ({ children }) => {
         setSearchRadius,
         currentPage,
         setCurrentPage,
-        searchTerm,
-        setSearchTerm,
+      
         dateTime,
         setDateTime,
         typeOfStatus,
