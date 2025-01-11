@@ -9,8 +9,8 @@ const App = () => {
     <>
       <Toaster reverseOrder={false} />
       <Routes>
-        <Route path="/" element={<WelcomePage />} />
-        <Route path="/flightTrackerPage" element={<FlightTrackerPage />} />
+        <Route path="/" element={<FlightTrackerPage />} />
+        <Route path="/flightTrackerPage" element={<WelcomePage />} />
         <Route path="/manishapp" element={<Appmanish />} />
 
       </Routes>

@@ -88,7 +88,9 @@ const MapComponent = () => {
            .addTo(map);
         });
 
-      }else{}
+      }else{
+        console.log("No airports found");
+      }
     };
 
     loadLeaflet();

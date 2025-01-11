@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useContext, useEffect, useState } from "react";
 import { Navbar } from "../../Components/Navbar";
 import { easeInOut, motion } from "framer-motion";
@@ -40,6 +41,18 @@ const FlightTrackerPage = () => {
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [locationLoading, setlocationLoading] = useState(false);
+  const [greeting, setGreeting] = useState('Good Morning');
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) {
+      setGreeting('Good Morning');
+    } else if (hour < 18) {
+      setGreeting('Good Afternoon');
+    } else {
+      setGreeting('Good Evening');
+    }
+  }, []);
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -116,7 +129,7 @@ const FlightTrackerPage = () => {
       <div className="w-full min-h-[80px] mt-[40px] text-xl rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 relative flex justify-between items-center px-[30px] py-[10px]">
         <div>
           <h1 className="font-semibold text-2xl max-sm:text-lg">
-            Good Morning, User!
+            {greeting}
           </h1>
           <h1 className="text-sm opacity-80">Current Location</h1>
           {locationLoading ? (

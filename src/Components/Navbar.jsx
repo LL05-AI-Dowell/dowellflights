@@ -1,7 +1,5 @@
-import React from 'react'
-import LanguageImage from "../assets/images/NavbarImages/LanguageSign.svg"
-import AdminImage from "../assets/images/NavbarImages/AdminImage.png"
 
+import LanguageImage from "../assets/images/NavbarImages/LanguageSign.svg"
 
 export const Navbar = () => {
   return (
@@ -11,8 +9,8 @@ export const Navbar = () => {
       </h1>
       <div className="flex gap-4 ">
         <img src={LanguageImage} alt="" />
-        <div className="w-[2px] h-[40px] bg-[#3F3F3F] "></div>
-        <div className="flex  items-center gap-4">
+        {/* <div className="w-[2px] h-[40px] bg-[#3F3F3F] "></div> */}
+        {/* <div className="flex  items-center gap-4">
           <div className="w-[40px] h-[40px] rounded-full overflow-hidden">
             <img src={AdminImage} alt="" />
           </div>
@@ -20,7 +18,7 @@ export const Navbar = () => {
             <h1>Admin</h1>
             <h1 className="text-xs">admin@domain.ae</h1>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

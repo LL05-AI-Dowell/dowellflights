@@ -6,7 +6,7 @@ import { AppProvider } from "./ContextApi/ContextApi.jsx";
 
 createRoot(document.getElementById("root")).render(
   
-  <BrowserRouter>
+  <BrowserRouter basename="/dowellflight">
   <AppProvider>
     <App />
   </AppProvider>
