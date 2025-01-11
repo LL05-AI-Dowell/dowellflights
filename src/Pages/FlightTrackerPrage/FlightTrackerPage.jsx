@@ -1,93 +1,136 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Navbar } from "../../Components/Navbar";
 import { easeInOut, motion } from "framer-motion";
-import FlightSearch from "../../Components/FlightSearch";
 import { IoAirplaneSharp } from "react-icons/io5";
 import { FaSliders } from "react-icons/fa6";
 import FlightStatusCard from "../../Components/FlightStatusCard";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { AppContext } from "../../ContextApi/ContextApi";
+import toast from "react-hot-toast";
+import AirportSearch from "../../Components/SearchForm";
 
 const FlightTrackerPage = () => {
- 
-  const {latitude ,setLatitude, longitude ,setLongitude ,airports , setAirports  ,airpoartsLoading , setairpoartsLoading , formState} = useContext(AppContext)
+  const {
+    latitude,
+    setLatitude,
+    longitude,
+    setLongitude,
+    airports,
+    setAirports,
+    loading,
+    setloading,
+    error,
+    setError,
+    flightsPerPage,
+    setFlightsPerPage,
+    searchRadius,
+    setSearchRadius,
+    currentPage,
+    setCurrentPage,
+    searchTerm,
+    setSearchTerm,
+    dateTime,
+    setDateTime,
+    typeOfStatus,
+    setTypeOfStatus,
+    selectedAirport,
+    setSelectedAirport,
+    flights,
+    setFlights,
+  } = useContext(AppContext);
 
-  const [loading, setloading] = useState(false);
-  const [flightloading, setflightloading] = useState(false);
- 
-  const [error, setError] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [locationLoading, setlocationLoading] = useState(false);
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  // getting latitude and longitude
-  useEffect(() => {
-    setloading(true);
+  // Function to get current location
+  const getCurrentLocation = () => {
+    setlocationLoading(true);
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           setLatitude(position.coords.latitude);
           setLongitude(position.coords.longitude);
-          setloading(false);
+          setlocationLoading(false);
         },
         (err) => {
           setError(`Error getting location: ${err.message}`);
+          toast.error(`Error getting location: ${err.message}`);
+          setlocationLoading(false);
         }
       );
     } else {
       setError("Geolocation is not supported by this browser.");
+      setlocationLoading(false);
     }
+  };
+
+  // Initial location fetch
+  useEffect(() => {
+    getCurrentLocation();
   }, []);
 
-  // getting airpoarts information
+  // getting airports information
   useEffect(() => {
     const fetchAirports = async (lat, long) => {
       try {
-        setairpoartsLoading(true);
+        setloading(true);
         const baseURL = "https://100085.pythonanywhere.com";
         const res = await axios.post(
           `${baseURL}/api/fligts/?type=get_airport_by_lat_long`,
           {
             latitude: lat,
             longitude: long,
-            radiusMiles: formState.searchRadius,
+            radiusMiles: searchRadius,
           }
         );
         setAirports(res.data.response || []);
       } catch (err) {
         console.log(`Error fetching airports: ${err.message}`);
       } finally {
-        setairpoartsLoading(false);
+        setloading(false);
       }
     };
 
     if (latitude && longitude) {
       fetchAirports(latitude, longitude);
     }
+  }, [latitude, longitude, searchRadius]);
 
-  }, [latitude, longitude, formState.searchRadius ]);
-
-  // { /* Loading State */}
-  // if(loading) {
-  //  return(
-  //     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm flex items-center justify-center z-50">
-  //       <div className="bg-gray-800/50 backdrop-blur-lg rounded-xl p-6 border border-gray-700/50">
-  //         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-  //         <p className="mt-4 text-center text-gray-300">Loading...</p>
-  //       </div>
-  //     </div>
-
-  //  )
-
-  // }
+  // getting flights
+  const fetchFlights = async (airportCode) => {
+    setloading(true);
+    try {
+      const baseURL = "https://100085.pythonanywhere.com";
+      const res = await axios.post(
+        `${baseURL}/api/fligts/?type=get_flights_arrival_departure`,
+        {
+          airport_code: airportCode,
+          year: dateTime.year,
+          month: dateTime.month,
+          day: dateTime.day,
+          hourOfDay: dateTime.hour,
+          maxFlights: flightsPerPage,
+          typeOfStatus: typeOfStatus,
+        }
+      );
+      setFlights(res.data.response || []);
+      setCurrentPage(1);
+    } catch (err) {
+      setError(`Error fetching flights: ${err.message}`);
+    } finally {
+      setloading(false);
+    }
+  };
 
   return (
-    <div className="w-full  bg-black relative  text-xl overflow-hidden px-[5vw] py-[30px] text-white">
+    <div className="w-full bg-black relative text-xl overflow-hidden px-[5vw] py-[30px] text-white">
       <div
-        className="absolute top-[-500px] left-[50%] translate-x-[-50%] h-[700px] z-[0]  w-[700px] rounded-full "
+        className="absolute top-[-500px] left-[50%] translate-x-[-50%] h-[700px] z-[0] w-[700px] rounded-full"
         style={{
           background: "radial-gradient(circle, #579B22 0%, transparent 60%)",
         }}
@@ -95,13 +138,13 @@ const FlightTrackerPage = () => {
 
       <Navbar />
 
-      <div className="w-full min-h-[80px] mt-[40px] text-xl rounded-2xl bg-[var(--light-black)] relative flex justify-between items-center px-[30px]  py-[10px]">
+      <div className="w-full min-h-[80px] mt-[40px] text-xl rounded-2xl bg-[var(--light-black)] relative flex justify-between items-center px-[30px] py-[10px]">
         <div>
           <h1 className="font-semibold text-2xl max-sm:text-lg">
             Good Morning, User!
           </h1>
-          <h1 className="text-sm opacity-80"> Current Location</h1>
-          {loading ? (
+          <h1 className="text-sm opacity-80">Current Location</h1>
+          {locationLoading ? (
             <motion.h1
               className="text-sm opacity-40"
               initial={{ opacity: 0 }}
@@ -152,13 +195,14 @@ const FlightTrackerPage = () => {
             </h1>
           )}
         </div>
-        <motion.button //+
+        <motion.button
           whileHover={{ scale: 1.05, opacity: 0.8 }}
           className="flex justify-center items-center font-semibold w-[200px] h-[50px] bg-[var(--primary-color-green)] rounded-xl"
+          onClick={getCurrentLocation} // Added onClick handler here
         >
-          {loading ? (
+          {locationLoading ? (
             <motion.h1
-              className="text-base "
+              className="text-base"
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.5 }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
@@ -207,8 +251,7 @@ const FlightTrackerPage = () => {
         </motion.button>
       </div>
 
-      {airports.length>0 && console.log(airports)}
-      <FlightSearch  />
+      <AirportSearch />
 
       {/* flights  */}
       <div className="w-full mt-[50px] flex justify-between items-center">
@@ -216,7 +259,7 @@ const FlightTrackerPage = () => {
           <IoAirplaneSharp className="text-[var(--primary-color-green)] rotate-[-45deg] text-xl" />
           <span className="text-2xl font-semibold">Flight Schedule</span>
         </div>
-        <div className="relative ">
+        <div className="relative">
           <button onClick={toggleDropdown} className="flex items-center gap-4">
             <FaSliders />
             All Filters
@@ -230,31 +273,113 @@ const FlightTrackerPage = () => {
               }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2, easing: easeInOut }}
-              className={`absolute z-[99]  flex flex-col  top-full left-[-20%]   bg-[var(--light-black)] py-4 px-8  rounded-md shadow-xl  ${
+              className={`absolute z-[40]  flex flex-col top-full right-0 bg-[var(--light-black)] py-4 px-8 rounded-md shadow-xl ${
                 isDropdownOpen ? "block" : "hidden"
               }`}
             >
-              <Link>Arrivals</Link>
-
-              <Link>Departures</Link>
+              <div
+                onClick={() => setTypeOfStatus("arr")}
+                className={`cursor-pointer w-full text-center p-2 ${
+                  typeOfStatus == "arr" && "bg-[var(--primary-color-green)]"
+                }  rounded-md mb-3`}
+              >
+                Arrivals
+              </div>
+              <div
+                onClick={() => setTypeOfStatus("dep")}
+                className={`cursor-pointer w-full text-center p-2 ${
+                  typeOfStatus == "dep" && "bg-[var(--primary-color-green)]"
+                }  rounded-md mb-3`}
+              >
+                Departures
+              </div>
             </motion.div>
           )}
         </div>
       </div>
-
-      {airpoartsLoading ? ( 
-         <div className=" backdrop-blur-lg rounded-xl p-6 ">
-           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500 mx-auto"></div>
-          <p className="mt-4 text-center text-gray-300">Loading...</p>
+      {selectedAirport ? (
+        flights.length > 0 ? (
+          <>
+            <div className="w-full  mt-[20px]">
+              {flights.map((flight, index) => (
+                <FlightStatusCard key={index} flight={flight} />
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="w-full h-[200px] text-center text-xl mt-[50px]">
+            <h1>No Flights Found</h1>
+          </div>
+        )
+      ) : (
+        <div className="w-full h-[200px] text-center text-xl mt-[50px]">
+          <h1>No Airport Selected</h1>
         </div>
-      ):(
+      )}
 
-        
-      <div className="w-full mt-[20px] ">
-        <FlightStatusCard />
-        <FlightStatusCard />
-        <FlightStatusCard />
-      </div>
+      {/* Loading State */}
+      {loading && (
+        <div className="fixed inset-0 bg-black bg-opacity-20 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-black bg-opacity-70 backdrop-blur-lg rounded-xl p-6 border border-gray-700/50">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500 mx-auto"></div>
+            <motion.h1
+              className="text-base mt-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              transition={{ duration: 0.5, ease: "easeInOut" }}
+            >
+              Loading
+              <motion.span
+                className="ml-1 font-bold"
+                animate={{ opacity: [1, 0] }}
+                transition={{
+                  duration: 1,
+                  delay: 0.11,
+                  repeat: Infinity,
+                  repeatType: "loop",
+                }}
+              >
+                .
+              </motion.span>
+              <motion.span
+                className="ml-1 font-bold"
+                animate={{ opacity: [1, 0] }}
+                transition={{
+                  duration: 1,
+                  delay: 0.33,
+                  repeat: Infinity,
+                  repeatType: "loop",
+                }}
+              >
+                .
+              </motion.span>
+              <motion.span
+                className="ml-1 font-bold"
+                animate={{ opacity: [1, 0] }}
+                transition={{
+                  duration: 1,
+                  delay: 0.66,
+                  repeat: Infinity,
+                  repeatType: "loop",
+                }}
+              >
+                .
+              </motion.span>
+              <motion.span
+                className="ml-1 font-bold"
+                animate={{ opacity: [1, 0] }}
+                transition={{
+                  duration: 1,
+                  delay: 0.99,
+                  repeat: Infinity,
+                  repeatType: "loop",
+                }}
+              >
+                .
+              </motion.span>
+            </motion.h1>
+          </div>
+        </div>
       )}
 
       {/* Error Message */}
